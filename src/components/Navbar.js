@@ -1,9 +1,17 @@
 
+import { Button } from 'primereact/button';
 import { Menubar } from 'primereact/menubar';
-import { Link } from 'react-router-dom';
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Logo from "../logo.png";
+import { accountService } from './accountService';
 
 export default function BasicDemo() {
+    let navigate = useNavigate();
+    const logout = () => {
+        accountService.logout();
+        navigate('/login');
+    }
     const items = [
         {
           label: 'Accueil',
@@ -12,25 +20,29 @@ export default function BasicDemo() {
           url: '/',
         },
         {
-          label: 'Profil',
+          label: 'Achat',
           icon: 'pi pi-user',
           command: () => {},
           url: '/profile',
         },
         {
-          label: 'Contact',
+          label: 'Producteur',
           icon: 'pi pi-phone',
           command: () => {},
           url: '/contact',
+        },
+        {
+          label: 'Tableau',
+          icon: 'pi pi-phone',
+          command: () => {},
+          url: '/datatable',
         }
     ];
 
-    const start = <img alt="logo" src="https://primefaces.org/cdn/primereact/images/logo.png" height="40" className="mr-2"></img>;
+    const start = <img alt="logo" src={Logo} height="90" className="mr-2"></img>;
     const end = (
         <div className="flex align-items-center gap-2">
-            <Link to="/login" rel="noopener noreferrer" className="p-button font-bold">
-                Log In
-            </Link>
+            <Button label="Deconnecté" severity="danger" onClick={logout} rounded/>
         </div>
     );
 
