@@ -10,6 +10,7 @@ import Logout from "./components/Logout";
 import Nopage from "./components/Nopage";
 import Profile from "./components/Profile";
 import Datatable from "./components/datatable";
+import ListAdmin from "./components/list_admin";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/contact" element={<Contact/>} />
           <Route path="/profile" element={<Profile/>} />
           <Route path="/datatable" element={<Datatable/>} />
+          <Route path="/listAdmin" element={<ListAdmin/>} />
         </Route>
         <Route path="/login" element={<Login/>} />
         <Route path="/logout" element={<Logout/>} />

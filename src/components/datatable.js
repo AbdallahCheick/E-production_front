@@ -178,14 +178,14 @@ export default function ProductsDemo() {
     const leftToolbarTemplate = () => {
         return (
             <div className="flex flex-wrap gap-2">
-                <Button label="New" icon="pi pi-plus" severity="success" onClick={openNew} />
-                <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
+                <Button label="Ajouter" icon="pi pi-plus" severity="success" onClick={openNew} />
+                <Button label="Supprimer" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
             </div>
         );
     };
 
     const rightToolbarTemplate = () => {
-        return <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
+        return <Button label="Exporter" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
     };
 
     const imageBodyTemplate = (rowData) => {
@@ -234,7 +234,7 @@ export default function ProductsDemo() {
             <h4 className="m-0">Manage Products</h4>
             <span className="p-input-icon-left">
                 <i className="pi pi-search" />
-                <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
+                <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Rechercher..." />
             </span>
         </div>
     );

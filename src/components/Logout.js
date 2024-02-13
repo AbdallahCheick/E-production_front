@@ -20,13 +20,13 @@ const Logout = () => {
 
   let navigate = useNavigate();
   const [formulaire, setFormulaire] = useState({
-    nom: 'f',
-    prenoms: 'f',
-    date : '27/10/2000',
-    password : 'f',
-    repassword : 'f',
-    username : 'f',
-    contact : '0779595588'
+    nom: '',
+    prenoms: '',
+    date : '',
+    password : '',
+    repassword : '',
+    username : '',
+    contact : ''
 
   });
 
