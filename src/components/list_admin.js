@@ -1,11 +1,11 @@
 import axios from "axios";
 import { Button } from 'primereact/button';
+import { Calendar } from 'primereact/calendar';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
-import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
-import { InputTextarea } from 'primereact/inputtextarea';
+import { Password } from 'primereact/password';
 import { RadioButton } from 'primereact/radiobutton';
 import { Rating } from 'primereact/rating';
 import { Tag } from 'primereact/tag';
@@ -17,11 +17,17 @@ import React, { useEffect, useRef, useState } from 'react';
 export default function ProductsDemo() {
     //Objet pour initialiser le state produits
     let emptyAdmin = {
-        nom: null,
-        prenoms: '',
-        date: null,
-        contact: ''
+        id : '',
+        nom : '',
+        prenoms :'',
+        sexe : '',
+        date :'',
+        password : '',
+        repassword : '',
+        username : '',
+        contact : ''
     };
+    
 
     const [admins, setAdmins] = useState(null);
     const [adminDialog, setAdminDialog] = useState(false);
@@ -33,6 +39,8 @@ export default function ProductsDemo() {
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
     const dt = useRef(null);
+    
+    const [date, setDate] = useState(null);
 
     useEffect(() => {
         axios.get('http://localhost:8080/api/v1/listadmin')
@@ -67,23 +75,49 @@ export default function ProductsDemo() {
         setDeleteAdminsDialog(false);
     };
 
+
+    //Ajout et la modification des administrateur
     const saveAdmin = () => {
         setSubmitted(true);
 
-        if (admin.name.trim()) {
+        if (admin.nom.trim()) {
             let _admins = [...admins];
-            let _admin = { ...admin };
-
+            let _admin = {...admin};
+            console.log(_admin);
+            console.log(_admin);
+            console.log(_admins);
+            //La modification
             if (admin.id) {
-                const index = findIndexById(admin.id);
-
-                _admins[index] = _admin;
-                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'admin Updated', life: 3000 });
+                //requete de mise a jour des données
+                axios.put('http://localhost:8080/api/v1/updateadmin',_admin )
+                .then(res => {
+                    //requete de rechargement de la liste des admins
+                    axios.get('http://localhost:8080/api/v1/listadmin')
+                    .then(res => {
+                        setAdmins(res['data']);
+                      console.log(res['data']);
+                    })
+                    .catch(error => console.log(error));
+                    console.log(res);
+                })
+                .catch(error => console.log(error.response.data.Erreur));
+                toast.current.show({ severity: 'success', summary: 'Success', detail: 'Modification effectué', life: 3000 });
             } else {
-                _admin.id = createId();
-                _admin.image = 'admin-placeholder.svg';
-                _admins.push(_admin);
-                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'admin Created', life: 3000 });
+                const dateActuelle = formatDate(date);
+                console.log(dateActuelle);
+                axios.post('http://localhost:8080/api/v1/addadmin',_admin )
+                .then(res => {
+                    //requete de rechargement de la liste des admins
+                    axios.get('http://localhost:8080/api/v1/listadmin')
+                    .then(res => {
+                        setAdmins(res['data']);
+                      console.log(res['data']);
+                    })
+                    .catch(error => console.log(error));
+                    console.log(res);
+                })
+                .catch(error => console.log(error.response.data.Erreur));
+                toast.current.show({ severity: 'success', summary: 'Sucess', detail: 'Administrateur Ajouté', life: 3000 });
             }
 
             setAdmins(_admins);
@@ -92,8 +126,30 @@ export default function ProductsDemo() {
         }
     };
 
+    const formatDate = (date) => {
+        if (date) {
+            const day = date.getDate();
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+
+            return `${year}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day}`;
+        }
+        return null;
+    };
+
     const editadmin = (admin) => {
-        setAdmin({ ...admin });
+        console.log(admin);
+        setAdmin({
+            id : admin.idAdmin,
+            nom : admin.nomAdmin,
+            prenoms : admin.prenomsAdmin,
+            sexe : admin.sexeAdmin,
+            date : admin.date_naissAdmin,
+            password : admin.pwdAdmin,
+            repassword : admin.pwdAdmin,
+            username : admin.usernameAdmin,
+            contact : admin.contactAdmin
+        });
         setAdminDialog(true);
     };
 
@@ -156,17 +212,24 @@ export default function ProductsDemo() {
 
     const onCategoryChange = (e) => {
         let _admin = { ...admin };
-
-        _admin['category'] = e.value;
+        _admin['sexe'] = e.value;
         setAdmin(_admin);
     };
-
+    
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
         let _admin = { ...admin };
 
         _admin[`${name}`] = val;
+        console.log(_admin);
+        setAdmin(_admin);
+    };
 
+    const onDateChange = (e) => {
+        let _admin = { ...admin };
+
+        _admin['date'] =formatDate(e.value) ;
+        console.log(_admin);
         setAdmin(_admin);
     };
 
@@ -249,7 +312,7 @@ export default function ProductsDemo() {
 
     const header = (
         <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-            <h4 className="m-0">Manage admins</h4>
+            <h4 className="m-0">Liste des Administrateurs</h4>
             <span className="p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Rechercher..." />
@@ -291,7 +354,9 @@ export default function ProductsDemo() {
                     <Column selectionMode="multiple" exportable={false}></Column>
                     <Column field="nomAdmin" header="Nom" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="prenomsAdmin" header="Prenoms" sortable style={{ minWidth: '16rem' }}></Column>
+                    <Column field="usernameAdmin" header="Nom d'utilisateur" sortable style={{ minWidth: '16rem' }}></Column>
                     <Column field="date_naissAdmin" header="Date de naissance" sortable style={{ minWidth: '16rem' }}></Column>
+                    <Column field="sexeAdmin" header="Sexe" sortable style={{ minWidth: '16rem' }}></Column>
                     <Column field="contactAdmin" header="Contact" sortable style={{ minWidth: '8rem' }}></Column>
                     <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
                 </DataTable>
@@ -299,57 +364,78 @@ export default function ProductsDemo() {
 
             {/*Popup d'ajout d'une ligne */}
             <Dialog visible={adminDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="admin Details" modal className="p-fluid" footer={adminDialogFooter} onHide={hideDialog}>
-                {admin.image && <img src={`https://primefaces.org/cdn/primereact/images/admin/${admin.image}`} alt={admin.image} className="admin-image block m-auto pb-3" />}
                 <div className="field">
-                    <label htmlFor="name" className="font-bold">
-                        Name
+                    <label htmlFor="nom" className="font-bold">
+                        Nom
                     </label>
-                    <InputText id="name" value={admin.nomAdmin} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !admin.name })} />
-                    {submitted && !admin.name && <small className="p-error">Name is required.</small>}
+                    <InputText id="nom" value={admin.nom} onChange={(e) => onInputChange(e, 'nom')} required autoFocus className={classNames({ 'p-invalid': submitted && !admin.nom })} />
+                    {submitted && !admin.nom && <small className="p-error">Le nom est obligatoire.</small>}
                 </div>
                 <div className="field">
-                    <label htmlFor="description" className="font-bold">
-                        Description
+                    <label htmlFor="prenoms" className="font-bold">
+                        Prenoms
                     </label>
-                    <InputTextarea id="description" value={admin.description} onChange={(e) => onInputChange(e, 'description')} required rows={3} cols={20} />
+                    <InputText id="prenoms" value={admin.prenoms} onChange={(e) => onInputChange(e, 'prenoms')} required autoFocus className={classNames({ 'p-invalid': submitted && !admin.prenoms })} />
+                    {submitted && !admin.prenoms && <small className="p-error">Le nom est obligatoire.</small>}
                 </div>
 
                 <div className="field">
-                    <label className="mb-3 font-bold">Category</label>
+                    <label className="mb-3 font-bold">Sexe</label>
                     <div className="formgrid grid">
                         <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category1" name="category" value="Accessories" onChange={onCategoryChange} checked={admin.category === 'Accessories'} />
-                            <label htmlFor="category1">Accessories</label>
+                            <RadioButton inputId="f" name="sexe" value="F" onChange={onCategoryChange} checked={admin.sexe === 'F'} />
+                            <label htmlFor="f">Feminin</label>
                         </div>
                         <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category2" name="category" value="Clothing" onChange={onCategoryChange} checked={admin.category === 'Clothing'} />
-                            <label htmlFor="category2">Clothing</label>
+                            <RadioButton inputId="m" name="sexe" value="M" onChange={onCategoryChange} checked={admin.sexe === 'M'} />
+                            <label htmlFor="m">Masculin</label>
                         </div>
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category3" name="category" value="Electronics" onChange={onCategoryChange} checked={admin.category === 'Electronics'} />
-                            <label htmlFor="category3">Electronics</label>
-                        </div>
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category4" name="category" value="Fitness" onChange={onCategoryChange} checked={admin.category === 'Fitness'} />
-                            <label htmlFor="category4">Fitness</label>
-                        </div>
+                    </div>
+                </div>
+
+                <div className="field">
+                    <label htmlFor="date" className="font-bold">
+                        Date de naissance
+                    </label>
+                    <Calendar  id="date" value={admin.date} onChange={onDateChange} required  className={classNames({ 'p-invalid': submitted && !admin.date })} dateFormat="dd/mm/yy" />
+                    {submitted && !admin.date && <small className="p-error">La date de naissance est obligatoire.</small>}
+                </div>
+
+                
+                <div className="formgrid grid">
+                    <div className="field col">
+                        <label htmlFor="username" className="font-bold">
+                            Nom d'utilisateur
+                        </label>
+                        <InputText id="username" value={admin.username} onChange={(e) => onInputChange(e, 'username')} required autoFocus className={classNames({ 'p-invalid': submitted && !admin.username })} />
+                        {submitted && !admin.username && <small className="p-error">Le nom d'utilisateur est obligatoire.</small>} 
+                    </div>
+                    <div className="field col">
+                        <label htmlFor="contact" className="font-bold">
+                            Contact
+                        </label>
+                        <InputText id="contact" value={admin.contact} onChange={(e) => onInputChange(e, 'contact')} required autoFocus className={classNames({ 'p-invalid': submitted && !admin.contact })} />
+                        {submitted && !admin.contact && <small className="p-error">Le contact est obligatoire</small>}
                     </div>
                 </div>
 
                 <div className="formgrid grid">
                     <div className="field col">
-                        <label htmlFor="price" className="font-bold">
-                            Price
+                        <label htmlFor="username" className="font-bold">
+                            Mot de passe
                         </label>
-                        <InputNumber id="price" value={admin.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" />
+                        <Password  id="password" value={admin.password} onChange={(e) => onInputChange(e, 'password')} required autoFocus className={classNames({ 'p-invalid': submitted && !admin.password })} feedback={false} toggleMask  />
+                        {submitted && !admin.password && <small className="p-error">Le mot de passe est obligatoire.</small>} 
                     </div>
                     <div className="field col">
-                        <label htmlFor="quantity" className="font-bold">
-                            Quantity
+                        <label htmlFor="contact" className="font-bold">
+                            Confirmation mot de passe
                         </label>
-                        <InputNumber id="quantity" value={admin.quantity} onValueChange={(e) => onInputNumberChange(e, 'quantity')} />
+                        <Password  id="contact" value={admin.repassword} onChange={(e) => onInputChange(e, 'repassword')} required autoFocus className={classNames({ 'p-invalid': submitted && !admin.contact })} feedback={false}  toggleMask />
+                        {submitted && !admin.contact && <small className="p-error">Confirmer le mot de passe</small>}
                     </div>
                 </div>
+                
             </Dialog>
 
 
