@@ -36,10 +36,16 @@ export default function BasicDemo() {
           url: '/contact',
         },
         {
-          label: 'Tableau',
+          label: 'Admin',
           icon: 'pi pi-phone',
           command: () => {},
           url: '/listAdmin',
+        },
+        {
+          label: 'Producteur',
+          icon: 'pi pi-phone',
+          command: () => {},
+          url: '/listProducteur',
         }
     ];
 

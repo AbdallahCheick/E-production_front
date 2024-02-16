@@ -13,6 +13,7 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
+import Swal from 'sweetalert2';
 
 export default function ProductsDemo() {
     //Objet pour initialiser le state produits
@@ -45,8 +46,9 @@ export default function ProductsDemo() {
     useEffect(() => {
         axios.get('http://localhost:8080/api/v1/listadmin')
         .then(res => {
+            const __admin = res['data'];
             setAdmins(res['data']);
-          console.log(res['data']);
+            console.log(__admin);
         })
         .catch(error => console.log(error));
     }, []);
@@ -116,8 +118,14 @@ export default function ProductsDemo() {
                     .catch(error => console.log(error));
                     console.log(res);
                 })
-                .catch(error => console.log(error.response.data.Erreur));
-                toast.current.show({ severity: 'success', summary: 'Sucess', detail: 'Administrateur Ajouté', life: 3000 });
+                .catch(error => {
+                    console.log(error.response.data.Erreur)
+                    Swal.fire({
+                        title: "Erreur",
+                        text: error.response.data.Erreur,
+                        icon: "error"
+                      });
+                    });
             }
 
             setAdmins(_admins);
@@ -155,16 +163,47 @@ export default function ProductsDemo() {
 
     const confirmDeleteAdmin = (admin) => {
         setAdmin(admin);
-        setDeleteAdminDialog(true);
+        Swal.fire({
+            title: "Etes vous sûre?",
+            text: "Cette action est irreversible!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Oui, je supprime",
+            cancelButtonText: "Annuller"
+          }).then((result) => {
+            if (result.isConfirmed) {
+                let _admins = {id : ""+admin.idAdmin+""};
+                console.log(_admins);
+        
+                axios.post('http://localhost:8080/api/v1/deleteadmin', _admins)
+                .then(res => {
+                    //requete de rechargement de la liste des admins
+                    axios.get('http://localhost:8080/api/v1/listadmin')
+                    .then(res => {
+                        setAdmins(res['data']);
+                      console.log(res['data']);
+                    })
+                    .catch(error => console.log(error));
+                    console.log(res);
+                })
+                .catch(error => console.log(error));
+                setDeleteAdminDialog(false);
+                setAdmin(emptyAdmin);
+              Swal.fire({
+                title: "Deleted!",
+                text: "Your file has been deleted.",
+                icon: "success"
+              });
+            }
+          });
     };
 
     const deleteAdmin = () => {
         //Suppression d'un produit specifique
-        let _admins = admins.filter((val) => val.id !== admin.id);
+        console.log(admin);
 
-        setAdmins(_admins);
-        setDeleteAdminDialog(false);
-        setAdmin(emptyAdmin);
         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'admin Deleted', life: 3000 });
     };
 
@@ -202,6 +241,28 @@ export default function ProductsDemo() {
 
     const deleteSelectedAdmins = () => {
         //Requete de suppression des produit
+        
+        const selectlength = selectedAdmins.length ; 
+        for (let i = 0; i < selectlength; i++ ){
+            console.log(selectedAdmins[i]);
+            const _idadmin = {id : selectedAdmins[i].idAdmin};
+            console.log(_idadmin);
+            axios.post("http://localhost:8080/api/v1/deleteadmin", _idadmin)
+            .then(res =>{
+                //requete de rechargement de la liste des admins
+                axios.get('http://localhost:8080/api/v1/listadmin')
+                .then(res => {
+                    setAdmins(res['data']);
+                  console.log(res['data']);
+                })
+                .catch(error => console.log(error));
+                console.log(res['data']);
+            })
+            .catch(error =>{
+                console.log(error);
+            })
+        }
+        
         let _admins = admins.filter((val) => !selectedAdmins.includes(val));
 
         setAdmins(_admins);
@@ -244,12 +305,22 @@ export default function ProductsDemo() {
 
     //Gestion des bouton d'ajout et de suppression
     const leftToolbarTemplate = () => {
-        return (
-            <div className="flex flex-wrap gap-2">
+        
+        const level = parseInt(localStorage.getItem('userLevel'));
+        if (level === 1) {
+            return(
+                <div className="flex flex-wrap gap-2">
+                    <Button label="Ajouter" icon="pi pi-plus" severity="success" onClick={openNew} />
+                    <Button label="Supprimer" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedAdmins || !selectedAdmins.length} />
+                </div>
+
+            )
+        }
+        else{
+            return(
                 <Button label="Ajouter" icon="pi pi-plus" severity="success" onClick={openNew} />
-                <Button label="Supprimer" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedAdmins || !selectedAdmins.length} />
-            </div>
-        );
+            )
+        }
     };
 
     //Gestion de l'export 
@@ -431,8 +502,8 @@ export default function ProductsDemo() {
                         <label htmlFor="contact" className="font-bold">
                             Confirmation mot de passe
                         </label>
-                        <Password  id="contact" value={admin.repassword} onChange={(e) => onInputChange(e, 'repassword')} required autoFocus className={classNames({ 'p-invalid': submitted && !admin.contact })} feedback={false}  toggleMask />
-                        {submitted && !admin.contact && <small className="p-error">Confirmer le mot de passe</small>}
+                        <Password  id="contact" value={admin.repassword} onChange={(e) => onInputChange(e, 'repassword')} required autoFocus className={classNames({ 'p-invalid': submitted && !admin.repassword })} feedback={false}  toggleMask />
+                        {submitted && !admin.repassword && <small className="p-error">Confirmer le mot de passe</small>}
                     </div>
                 </div>
                 
