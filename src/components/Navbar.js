@@ -46,6 +46,24 @@ export default function BasicDemo() {
           icon: 'pi pi-phone',
           command: () => {},
           url: '/listProducteur',
+        },
+        {
+          label: 'Categories',
+          icon: 'pi pi-phone',
+          command: () => {},
+          url: '/listCategorie',
+        },
+        {
+          label: 'Produit',
+          icon: 'pi pi-phone',
+          command: () => {},
+          url: '/listProduit',
+        },
+        {
+          label: 'Achats',
+          icon: 'pi pi-phone',
+          command: () => {},
+          url: '/listAchat',
         }
     ];
 

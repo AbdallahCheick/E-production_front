@@ -12,6 +12,9 @@ import Profile from "./components/Profile";
 import Datatable from "./components/datatable";
 import ListAdmin from "./components/list_admin";
 import ListProducteur from "./components/list_producteur";
+import ListCategories from "./components/list_categories";
+import ListAchat from "./components/list_achat";
+import ListProduit from "./components/list_produit";
 
 function App() {
   return (
@@ -29,6 +32,9 @@ function App() {
           <Route path="/datatable" element={<Datatable/>} />
           <Route path="/listAdmin" element={<ListAdmin/>} />
           <Route path="/listProducteur" element={<ListProducteur/>} />
+          <Route path="/listCategorie" element={<ListCategories/>} />
+          <Route path="/listAchat" element={<ListAchat/>} />
+          <Route path="/listProduit" element={<ListProduit/>} />
         </Route>
         <Route path="/login" element={<Login/>} />
         <Route path="/logout" element={<Logout/>} />

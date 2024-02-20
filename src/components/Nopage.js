@@ -3,7 +3,6 @@ import React, { useState } from "react";
 
 const Nopage = () => {
 
-  const [selectedCity, setSelectedCity] = useState(null);
   const cities = [
       { name: 'New York' },
       { name: 'Rome' },
@@ -11,7 +10,10 @@ const Nopage = () => {
       { name: 'Istanbul' },
       { name: 'Paris' }
   ];
-  console.log(selectedCity);
+
+  // Initialiser selectedCity avec l'objet de la ville "Rome"
+  const [selectedCity, setSelectedCity] = useState(cities.find(city => city.name === 'Rome'));
+
   return (
     <div>
         <h1>404 PAGE NOT FOUND</h1>

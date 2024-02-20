@@ -4,12 +4,12 @@ import { Calendar } from 'primereact/calendar';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
+import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { RadioButton } from 'primereact/radiobutton';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
-import { Dropdown } from 'primereact/dropdown';
 import React, { useEffect, useRef, useState } from 'react';
 import Swal from 'sweetalert2';
 
@@ -21,9 +21,7 @@ export default function ProductsDemo() {
         prenoms :'',
         sexe : '',
         date :'',
-        password : '',
-        repassword : '',
-        username : '',
+        produit : '',
         contact : ''
     };
     
@@ -43,25 +41,21 @@ export default function ProductsDemo() {
     useEffect(() => {
         axios.get('http://localhost:8080/api/v1/listproducteur')
         .then(res => {
-            const __prod = res['data'];
-            console.log(__prod);
-            console.log(__prod.length)
-            for(let i = 0; i < __prod.length; i++){
-                const idproduit = {idProduit : __prod[i].idProduit};
-                axios.post('http://localhost:8080/api/v1/filterproduit', idproduit)
-                .then(resp =>{
-                    setProduit(resp['data']);
-                    __prod[i].nomproduit =  resp['data'][0].libelleProduit;
-                    console.log(__prod);
-                    setProds(__prod);
-                })
-                .catch(error => console.log(error));
-            }
+            setProds(res['data'])
+            console.log(res['data']);
             
         })
         .catch(error => console.log(error));
-    }, []);
 
+        axios.get('http://localhost:8080/api/v1/listproduit')
+        .then(res => {
+            console.log(res['data']);
+            setProduit(res['data']);
+        })
+        .catch(error =>{
+            console.log(error);
+        })
+    }, []);
 
     //Pour le bouton Ajouter
     const openNew = () => {
@@ -92,8 +86,8 @@ export default function ProductsDemo() {
             let _prods = [...prods];
             let _prod = {...prod};
             console.log(_prod);
-            console.log(_prod);
             console.log(_prods);
+            console.log("Bien noté");
             //La modification
             if (prod.id) {
                 //requete de mise a jour des données
@@ -111,10 +105,10 @@ export default function ProductsDemo() {
                 .catch(error => console.log(error.response.data.Erreur));
                 toast.current.show({ severity: 'success', summary: 'Success', detail: 'Modification effectué', life: 3000 });
             } else {
-                axios.post('http://localhost:8080/api/v1/addprod',_prod )
+                axios.post('http://localhost:8080/api/v1/addproducteur',_prod )
                 .then(res => {
                     //requete de rechargement de la liste des prods
-                    axios.get('http://localhost:8080/api/v1/listprod')
+                    axios.get('http://localhost:8080/api/v1/listproducteur')
                     .then(res => {
                         setProds(res['data']);
                       console.log(res['data']);
@@ -158,12 +152,16 @@ export default function ProductsDemo() {
             sexe : prod.sexeProd,
             date : prod.date_naissProd,
             produit : prod.idProduit,
+            nomproduit : prod.nomProduit,
             contact : prod.contactProd
         });
+
+        console.log(selectedprods);
         setProdDialog(true);
     };
 
     const confirmDeleteProd = (prod) => {
+        console.log(prod);
         setProd(prod);
         Swal.fire({
             title: "Etes vous sûre?",
@@ -176,13 +174,13 @@ export default function ProductsDemo() {
             cancelButtonText: "Annuller"
           }).then((result) => {
             if (result.isConfirmed) {
-                let _prods = {id : ""+prod.idprod+""};
+                let _prods = {id : ""+prod.idProd+""};
                 console.log(_prods);
         
-                axios.post('http://localhost:8080/api/v1/deleteProd', _prods)
+                axios.post('http://localhost:8080/api/v1/deleteProducteur', _prods)
                 .then(res => {
                     //requete de rechargement de la liste des prods
-                    axios.get('http://localhost:8080/api/v1/listprod')
+                    axios.get('http://localhost:8080/api/v1/listproducteur')
                     .then(res => {
                         setProds(res['data']);
                       console.log(res['data']);
@@ -225,12 +223,12 @@ export default function ProductsDemo() {
         const selectlength = selectedprods.length ; 
         for (let i = 0; i < selectlength; i++ ){
             console.log(selectedprods[i]);
-            const _idprod = {id : selectedprods[i].idprod};
+            const _idprod = {id : selectedprods[i].idProd};
             console.log(_idprod);
-            axios.post("http://localhost:8080/api/v1/deleteProd", _idprod)
+            axios.post("http://localhost:8080/api/v1/deleteProducteur", _idprod)
             .then(res =>{
                 //requete de rechargement de la liste des prods
-                axios.get('http://localhost:8080/api/v1/listprod')
+                axios.get('http://localhost:8080/api/v1/listproducteur')
                 .then(res => {
                     setProds(res['data']);
                   console.log(res['data']);
@@ -257,6 +255,14 @@ export default function ProductsDemo() {
         setProd(_prod);
     };
     
+    const onProduitChange = (e) => {
+        let _prod = { ...prod };
+        const produitvalue = e.value;
+        console.log(produitvalue);
+        _prod['produit'] = produitvalue.idProduit;
+        setProd(_prod);
+    };
+
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
         let _prod = { ...prod };
@@ -362,7 +368,7 @@ export default function ProductsDemo() {
                     <Column selectionMode="multiple" exportable={false}></Column>
                     <Column field="nomProd" header="Nom" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="prenomsProd" header="Prenoms" sortable style={{ minWidth: '16rem' }}></Column>
-                    <Column field="nomproduit" header="Produit" sortable style={{ minWidth: '16rem' }}></Column>
+                    <Column field="nomProduit" header="Produit" sortable style={{ minWidth: '16rem' }}></Column>
                     <Column field="date_naissProd" header="Date de naissance" sortable style={{ minWidth: '16rem' }}></Column>
                     <Column field="sexeProd" header="Sexe" sortable style={{ minWidth: '16rem' }}></Column>
                     <Column field="contactProd" header="Contact" sortable style={{ minWidth: '8rem' }}></Column>
@@ -411,10 +417,13 @@ export default function ProductsDemo() {
 
                 
                 <div className="formgrid grid">
-                <div className="card flex justify-content-center">
-                     <Dropdown value={produit} onChange={(e) => setProduit(e.value)} options={produit} optionLabel="libelleProduit"
-                placeholder="Select a City" className="w-full md:w-14rem" />
-                 </div>
+                    <div className="field col">
+                        <label htmlFor="username" className="font-bold">
+                            Produit
+                        </label>
+                        <Dropdown value={prod.nomproduit} onChange={onProduitChange} options={produit} optionLabel="libelleProduit" placeholder="Select a City" className="w-full md:w-14rem" />
+                    </div>
+
                     <div className="field col">
                         <label htmlFor="contact" className="font-bold">
                             Contact
