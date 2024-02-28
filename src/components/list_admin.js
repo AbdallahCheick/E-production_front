@@ -318,7 +318,7 @@ export default function ProductsDemo() {
         }
         else{
             return(
-                <Button label="Ajouter" icon="pi pi-plus" severity="success" onClick={openNew} />
+                null
             )
         }
     };

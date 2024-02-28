@@ -44,7 +44,7 @@ export default function ProductsDemo() {
     const [date, setDate] = useState(null);
 
     useEffect(() => {
-        axios.get('http://localhost:8080/api/v1/listadmin')
+        axios.get('http://localhost:8080/api/v1/listachat')
         .then(res => {
             const __admin = res['data'];
             setAdmins(res['data']);
@@ -419,16 +419,17 @@ export default function ProductsDemo() {
 
                 {/*Datatable*/}
                 <DataTable ref={dt} value={admins} selection={selectedAdmins} onSelectionChange={(e) => setSelectedAdmins(e.value)}
-                        dataKey="idAdmin"  paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+                        dataKey="idAchat"  paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} admins" globalFilter={globalFilter} header={header}>
                     <Column selectionMode="multiple" exportable={false}></Column>
-                    <Column field="nomAdmin" header="Nom" sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column field="prenomsAdmin" header="Prenoms" sortable style={{ minWidth: '16rem' }}></Column>
-                    <Column field="usernameAdmin" header="Nom d'utilisateur" sortable style={{ minWidth: '16rem' }}></Column>
-                    <Column field="date_naissAdmin" header="Date de naissance" sortable style={{ minWidth: '16rem' }}></Column>
-                    <Column field="sexeAdmin" header="Sexe" sortable style={{ minWidth: '16rem' }}></Column>
-                    <Column field="contactAdmin" header="Contact" sortable style={{ minWidth: '8rem' }}></Column>
+                    <Column field="nomProducteur" header="Producteur" sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column field="nomProduit" header="Produit" sortable style={{ minWidth: '16rem' }}></Column>
+                    <Column field="prixProduit" header="Prix" sortable style={{ minWidth: '16rem' }}></Column>
+                    <Column field="idAdmin" header="Acheter par" sortable style={{ minWidth: '16rem' }}></Column>
+                    <Column field="dateAchat" header="Date d'achat" sortable style={{ minWidth: '16rem' }}></Column>
+                    <Column field="quantiteAchat" header="Quantité" sortable style={{ minWidth: '16rem' }}></Column>
+                    <Column field="montantAchat" header="Montant" sortable style={{ minWidth: '8rem' }}></Column>
                     <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
                 </DataTable>
             </div>
